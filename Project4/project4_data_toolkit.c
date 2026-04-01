@@ -92,7 +92,7 @@ int main(void) {
     choice = readInt("Choice", 0, MENU_SIZE);
     if (choice == 0) break;
 
-    // ─── Dynamic Dispatch ────────────────────────────────────────────────────
+    //  Dynamic Dispatch ─
     // No long if/else chain — the function pointer does the work directly.
     OperationFn op = menu[choice - 1].fn;
     if (op != NULL)
@@ -107,7 +107,7 @@ int main(void) {
   return 0;
 }
 
-// ─── Dataset Lifecycle ────────────────────────────────────────────────────────
+//  Dataset Lifecycle 
 void ds_init(Dataset* ds) {
   ds->capacity = 16;
   ds->size     = 0;
@@ -146,7 +146,7 @@ void ds_print(Dataset* ds) {
   printf("]\n  Size: %d\n", ds->size);
 }
 
-// ─── Operation Implementations ────────────────────────────────────────────────
+//  Operation Implementations 
 
 void op_displayDataset(Dataset* ds) {
   printf("\nDataset:\n");
@@ -173,7 +173,7 @@ void op_findMinMax(Dataset* ds) {
   printf("  Maximum: %.6g  (index %d)\n", mx, mxIdx);
 }
 
-// ─── Filter (callback-based) ─────────────────────────────────────────────────
+//  Filter (callback-based) 
 void op_filter(Dataset* ds) {
   if (ds->size == 0) { printf("Dataset is empty.\n"); return; }
 
@@ -183,7 +183,7 @@ void op_filter(Dataset* ds) {
   printf("    3) Values equal to threshold\n");
   int type = readInt("  Choice", 1, 3);
 
-  // Select callback using array of function pointers
+ 
   FilterFn filters[] = { filter_above, filter_below, filter_equal };
   FilterFn  fn = filters[type - 1];
 
@@ -206,7 +206,7 @@ int filter_above(double v, double p) { return v >  p; }
 int filter_below(double v, double p) { return v <  p; }
 int filter_equal(double v, double p) { return fabs(v - p) < 1e-9; }
 
-// ─── Transform (callback-based) ──────────────────────────────────────────────
+//  Transform 
 void op_transform(Dataset* ds) {
   if (ds->size == 0) { printf("Dataset is empty.\n"); return; }
 
@@ -237,7 +237,7 @@ double transform_scale (double v, double p) { return v * p; }
 double transform_shift (double v, double p) { return v + p; }
 double transform_square(double v, double p) { (void)p; return v * v; }
 
-// ─── Sort (comparison function pointer via qsort) ─────────────────────────────
+//  Sort 
 void op_sort(Dataset* ds) {
   if (ds->size == 0) { printf("Dataset is empty.\n"); return; }
 
@@ -259,7 +259,7 @@ int cmp_desc(const void* a, const void* b) {
   return cmp_asc(b, a);
 }
 
-// ─── Search ───────────────────────────────────────────────────────────────────
+//  Search 
 void op_search(Dataset* ds) {
   if (ds->size == 0) { printf("Dataset is empty.\n"); return; }
   printf("  Search value: ");
@@ -277,7 +277,7 @@ void op_search(Dataset* ds) {
   printf("\n  Occurrences: %d\n", found);
 }
 
-// ─── File Operations ─────────────────────────────────────────────────────────
+//  File Operations 
 void op_loadFile(Dataset* ds) {
   char path[256];
   printf("  File path: ");
@@ -330,7 +330,7 @@ void op_resetDataset(Dataset* ds) {
   printf("  Dataset now has %d values.\n", ds->size);
 }
 
-// ─── Input Helpers ────────────────────────────────────────────────────────────
+//  Input Helpers 
 void clearInput(void) {
   int c; while ((c = getchar()) != '\n' && c != EOF) {}
 }
