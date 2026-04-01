@@ -1,28 +1,16 @@
-/**
- * Project 3: Course Performance and Academic Records Analyzer
- * ============================================================
- * Features:
- *   - Dynamic structure-based record management (malloc/realloc/free)
- *   - Full CRUD operations
- *   - Manual search (by ID, name) and sort (by GPA, name, ID)
- *   - Statistical reports: average, highest/lowest GPA, median, top-N
- *   - File persistence (binary format)
- *   - Comprehensive input validation and error handling
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+
 #define MAX_NAME    64
 #define MAX_COURSE  64
 #define MAX_SUBJECT 8
 #define DATA_FILE   "records.dat"
 
-// ─── Structures ───────────────────────────────────────────────────────────────
+
 typedef struct {
   int    studentID;
   char   name[MAX_NAME];
@@ -34,12 +22,12 @@ typedef struct {
 } Student;
 
 typedef struct {
-  Student* data;    // dynamic array
+  Student* data;    
   int      count;
   int      capacity;
 } Database;
 
-// ─── Function Prototypes ──────────────────────────────────────────────────────
+
 // DB management
 void     db_init(Database* db);
 int      db_add(Database* db, Student s);
@@ -90,25 +78,25 @@ int main(void) {
 
   int choice;
   do {
-    printf("\n╔══════════════════════════════════╗\n");
-    printf("║  Academic Records Analyzer       ║\n");
-    printf("╠══════════════════════════════════╣\n");
-    printf("║  1) Add student record           ║\n");
-    printf("║  2) Display all records          ║\n");
-    printf("║  3) Update record                ║\n");
-    printf("║  4) Delete record                ║\n");
-    printf("║  5) Search by ID                 ║\n");
-    printf("║  6) Search by name               ║\n");
-    printf("║  7) Sort by GPA                  ║\n");
-    printf("║  8) Sort by name                 ║\n");
-    printf("║  9) Sort by ID                   ║\n");
-    printf("║ 10) Report: Average GPA          ║\n");
-    printf("║ 11) Report: Top-N students       ║\n");
-    printf("║ 12) Report: Min/Max GPA          ║\n");
-    printf("║ 13) Report: Median GPA           ║\n");
-    printf("║ 14) Report: Per-course stats     ║\n");
-    printf("║ 15) Save and exit                ║\n");
-    printf("╚══════════════════════════════════╝\n");
+    printf("\n\n");
+    printf("  Academic Records Analyzer       \n");
+    printf("\n_________________________________");
+    printf("  1) Add student record           \n");
+    printf("  2) Display all records          \n");
+    printf("  3) Update record                \n");
+    printf("  4) Delete record                \n");
+    printf("  5) Search by ID                 \n");
+    printf("  6) Search by name               \n");
+    printf("  7) Sort by GPA                  \n");
+    printf("  8) Sort by name                 \n");
+    printf("  9) Sort by ID                   \n");
+    printf(" 10) Report: Average GPA          \n");
+    printf(" 11) Report: Top-N students       \n");
+    printf(" 12) Report: Min/Max GPA          \n");
+    printf(" 13) Report: Median GPA           \n");
+    printf(" 14) Report: Per-course stats     \n");
+    printf(" 15) Save and exit                \n");
+   
 
     choice = readInt("Choice", 1, 15);
 
@@ -138,7 +126,6 @@ int main(void) {
   return 0;
 }
 
-// ─── Database Management ──────────────────────────────────────────────────────
 void db_init(Database* db) {
   db->capacity = 8;
   db->count    = 0;
@@ -182,7 +169,6 @@ void db_free(Database* db) {
   db->count = db->capacity = 0;
 }
 
-// ─── GPA Helper ───────────────────────────────────────────────────────────────
 float computeGPA(float* grades, int n) {
   if (n <= 0) return 0.0f;
   float sum = 0;
@@ -190,7 +176,7 @@ float computeGPA(float* grades, int n) {
   return sum / n;
 }
 
-// ─── Print One Student ────────────────────────────────────────────────────────
+//Print One Student 
 void printStudent(Student* s) {
   printf("  ID: %-6d  Name: %-20s  Course: %-15s  Age: %-3d  GPA: %.2f\n",
          s->studentID, s->name, s->course, s->age, s->gpa);
@@ -200,7 +186,7 @@ void printStudent(Student* s) {
   printf("\n");
 }
 
-// ─── CRUD ─────────────────────────────────────────────────────────────────────
+
 void addRecord(Database* db) {
   Student s;
   memset(&s, 0, sizeof(s));
@@ -233,9 +219,9 @@ void displayAll(Database* db) {
   if (db->count == 0) { printf("No records found.\n"); return; }
   printf("\n%-6s  %-20s  %-15s  %-4s  %s\n",
          "ID", "Name", "Course", "Age", "GPA");
-  printf("%s\n", "──────────────────────────────────────────────────────────");
-  for (int i = 0; i < db->count; i++)
+  for (int i = 0; i < db->count; i++) {
     printStudent(&db->data[i]);
+  }
   printf("Total records: %d\n", db->count);
 }
 
@@ -280,7 +266,6 @@ void deleteRecord(Database* db) {
     printf("Student ID %d not found.\n", id);
 }
 
-// ─── Search ───────────────────────────────────────────────────────────────────
 void searchByID(Database* db) {
   int id = readInt("Enter student ID", 1, 999999);
   Student* s = db_findByID(db, id);
@@ -313,7 +298,6 @@ void searchByName(Database* db) {
   else printf("%d result(s).\n", found);
 }
 
-// ─── Sort Algorithms ──────────────────────────────────────────────────────────
 // Insertion sort by GPA descending
 void sortByGPA(Database* db) {
   for (int i = 1; i < db->count; i++) {
@@ -328,6 +312,7 @@ void sortByGPA(Database* db) {
   printf("Sorted by GPA (descending):\n");
   displayAll(db);
 }
+
 
 // Bubble sort by name ascending
 void sortByName(Database* db) {
@@ -358,7 +343,6 @@ void sortByID(Database* db) {
   displayAll(db);
 }
 
-// ─── Analytics ────────────────────────────────────────────────────────────────
 void reportAverageGPA(Database* db) {
   if (db->count == 0) { printf("No records.\n"); return; }
   float sum = 0;
@@ -446,7 +430,7 @@ void reportCourseStats(Database* db) {
   }
 }
 
-// ─── File I/O ─────────────────────────────────────────────────────────────────
+
 void saveToFile(Database* db) {
   FILE* f = fopen(DATA_FILE, "wb");
   if (!f) { perror("Cannot open file for writing"); return; }
@@ -473,7 +457,6 @@ void loadFromFile(Database* db) {
   printf("Loaded %d records from %s\n", db->count, DATA_FILE);
 }
 
-// ─── Input Helpers ────────────────────────────────────────────────────────────
 void clearInput(void) {
   int c; while ((c = getchar()) != '\n' && c != EOF) {}
 }
