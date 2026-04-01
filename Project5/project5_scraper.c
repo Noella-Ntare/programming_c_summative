@@ -1,23 +1,3 @@
-/**
- * Project 5: Multi-threaded Web Scraper
- * ======================================
- * Features:
- *   - Fetches multiple URLs in parallel using POSIX pthreads
- *   - Each thread writes its output to a separate file
- *   - No thread synchronization needed (each thread is independent)
- *   - Graceful error handling for unreachable URLs
- *   - Uses libcurl for HTTP requests
- *
- * Compile:
- *   gcc -o scraper scraper.c -lpthread -lcurl
- *
- * Usage:
- *   ./scraper urls.txt
- *   (one URL per line in urls.txt)
- *
- * Or edit the DEFAULT_URLS array below and run without arguments.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,14 +6,14 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-// ─── Configuration ────────────────────────────────────────────────────────────
+
 #define MAX_URLS       64
 #define MAX_URL_LEN    512
 #define OUTPUT_DIR     "scraped_output"
 #define CONNECT_TIMEOUT 10L   // seconds
 #define TRANSFER_TIMEOUT 30L  // seconds
 
-// ─── Default URLs (used when no file is provided) ─────────────────────────────
+
 static const char* DEFAULT_URLS[] = {
   "https://httpbin.org/html",
   "https://httpbin.org/json",
@@ -42,15 +22,13 @@ static const char* DEFAULT_URLS[] = {
   NULL
 };
 
-// ─── Structures ───────────────────────────────────────────────────────────────
 
-// Buffer for libcurl's write callback
 typedef struct {
   char*  data;
   size_t size;
 } Buffer;
 
-// Per-thread arguments — each thread gets its own copy
+
 typedef struct {
   int   threadID;
   char  url[MAX_URL_LEN];
@@ -59,7 +37,7 @@ typedef struct {
   char  errorMsg[256];
 } ThreadArgs;
 
-// ─── Prototypes ───────────────────────────────────────────────────────────────
+
 void*  scrape_thread(void* arg);
 size_t curl_write_callback(void* contents, size_t size, size_t nmemb, void* userp);
 int    load_urls_from_file(const char* path, char urls[][MAX_URL_LEN], int maxUrls);
@@ -67,11 +45,11 @@ void   sanitize_filename(const char* url, char* out, int maxLen);
 void   print_summary(ThreadArgs* results, int count);
 int    ensure_output_dir(void);
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+
 int main(int argc, char* argv[]) {
   printf("=== Multi-threaded Web Scraper ===\n");
 
-  // Initialise libcurl globally (once, before any threads)
+  
   if (curl_global_init(CURL_GLOBAL_ALL) != 0) {
     fprintf(stderr, "Failed to initialise libcurl.\n");
     return 1;
@@ -84,7 +62,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // ─── Build URL list ───────────────────────────────────────────────────────
+  //Build URL list 
   char   urls[MAX_URLS][MAX_URL_LEN];
   int    numURLs = 0;
 
@@ -105,7 +83,7 @@ int main(int argc, char* argv[]) {
 
   printf("Scraping %d URL(s) in parallel...\n\n", numURLs);
 
-  // ─── Allocate thread handles and argument structs ─────────────────────────
+
   pthread_t*  threads = (pthread_t*)malloc(numURLs * sizeof(pthread_t));
   ThreadArgs* args    = (ThreadArgs*)calloc(numURLs, sizeof(ThreadArgs));
   if (!threads || !args) {
@@ -115,8 +93,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // ─── Launch one thread per URL ────────────────────────────────────────────
-  for (int i = 0; i < numURLs; i++) {
+  //Launch one thread per URL
     args[i].threadID = i + 1;
     strncpy(args[i].url, urls[i], MAX_URL_LEN - 1);
 
@@ -137,7 +114,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  // ─── Wait for all threads to complete ────────────────────────────────────
+ \
   for (int i = 0; i < numURLs; i++) {
     if (threads[i] != 0) {
       int rc = pthread_join(threads[i], NULL);
@@ -146,7 +123,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  // ─── Print summary ────────────────────────────────────────────────────────
+  //\Print summary
   print_summary(args, numURLs);
 
   free(threads);
@@ -204,7 +181,7 @@ void* scrape_thread(void* arg) {
                "Cannot open output file: %s", targs->outputFile);
       targs->success = 0;
     } else {
-      // Write metadata header
+      
       fprintf(f, "<!-- Scraped by Thread %d -->\n", targs->threadID);
       fprintf(f, "<!-- URL: %s -->\n", targs->url);
       fprintf(f, "<!-- Bytes: %zu -->\n\n", buf.size);
@@ -221,8 +198,7 @@ void* scrape_thread(void* arg) {
   return NULL;
 }
 
-// ─── libcurl Write Callback ───────────────────────────────────────────────────
-// Called by libcurl as data arrives; appends to the Buffer.
+
 size_t curl_write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
   size_t   realsize = size * nmemb;
   Buffer*  buf      = (Buffer*)userp;
@@ -230,7 +206,7 @@ size_t curl_write_callback(void* contents, size_t size, size_t nmemb, void* user
   char* ptr = (char*)realloc(buf->data, buf->size + realsize + 1);
   if (!ptr) {
     fprintf(stderr, "realloc failed in write callback.\n");
-    return 0;   // Signal error to libcurl
+    return 0;   
   }
   buf->data = ptr;
   memcpy(buf->data + buf->size, contents, realsize);
@@ -239,7 +215,7 @@ size_t curl_write_callback(void* contents, size_t size, size_t nmemb, void* user
   return realsize;
 }
 
-// ─── Load URLs from File ──────────────────────────────────────────────────────
+//Load URLs from File
 int load_urls_from_file(const char* path, char urls[][MAX_URL_LEN], int maxUrls) {
   FILE* f = fopen(path, "r");
   if (!f) { perror(path); return -1; }
@@ -247,9 +223,7 @@ int load_urls_from_file(const char* path, char urls[][MAX_URL_LEN], int maxUrls)
   int count = 0;
   char line[MAX_URL_LEN];
   while (count < maxUrls && fgets(line, sizeof(line), f)) {
-    // Strip newline and trailing whitespace
     line[strcspn(line, "\r\n")] = 0;
-    // Skip empty lines and comments
     if (strlen(line) == 0 || line[0] == '#') continue;
     strncpy(urls[count++], line, MAX_URL_LEN - 1);
   }
@@ -257,10 +231,8 @@ int load_urls_from_file(const char* path, char urls[][MAX_URL_LEN], int maxUrls)
   return count;
 }
 
-// ─── Sanitize URL to Safe Filename ───────────────────────────────────────────
 void sanitize_filename(const char* url, char* out, int maxLen) {
   int j = 0;
-  // Skip protocol (http:// / https://)
   const char* start = url;
   if (strncmp(url, "https://", 8) == 0) start += 8;
   else if (strncmp(url, "http://",  7) == 0) start += 7;
@@ -278,11 +250,11 @@ void sanitize_filename(const char* url, char* out, int maxLen) {
   if (j == 0) { strncpy(out, "url", maxLen-1); }
 }
 
-// ─── Print Summary Table ─────────────────────────────────────────────────────
+//Print Summary Table 
 void print_summary(ThreadArgs* results, int count) {
   int ok = 0, fail = 0;
-  printf("\n╔════╦════════════════════════════════════════════╦═══════╗\n");
-  printf("║ ID ║ URL                                        ║ Status║\n");
+
+  printf("║ ID ║ URL                                        ║Status\n");
   printf("╠════╬════════════════════════════════════════════╬═══════╣\n");
   for (int i = 0; i < count; i++) {
     printf("║ %2d ║ %-42.42s ║ %-6s║\n",
@@ -296,7 +268,7 @@ void print_summary(ThreadArgs* results, int count) {
   printf("Results: %d succeeded, %d failed. Output in '%s/'\n", ok, fail, OUTPUT_DIR);
 }
 
-// ─── Create Output Directory ─────────────────────────────────────────────────
+// Create Output Directory 
 int ensure_output_dir(void) {
   struct stat st;
   if (stat(OUTPUT_DIR, &st) == 0) return 1;  // already exists
