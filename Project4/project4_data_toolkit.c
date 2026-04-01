@@ -1,41 +1,30 @@
-/**
- * Project 4: Data Analysis Toolkit Using Function Pointers and Callbacks
- * =======================================================================
- * Features:
- *   - Dynamic function dispatch via function pointer array (no long if/else)
- *   - Callback-based filtering, transformation, and sorting
- *   - Dynamic dataset with malloc/realloc/free
- *   - File load/save
- *   - Full input validation and error handling
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
 
-// ─── Dataset ──────────────────────────────────────────────────────────────────
+
 typedef struct {
   double* values;
   int     size;
   int     capacity;
 } Dataset;
 
-// ─── Callback Types ───────────────────────────────────────────────────────────
+
 typedef int    (*FilterFn)  (double value, double param);
 typedef double (*TransformFn)(double value, double param);
 typedef int    (*CompareFn) (const void* a, const void* b);
+typedef void   (*OperationFn)(Dataset* ds);
 
-// ─── Function Pointer Dispatcher Entry ───────────────────────────────────────
-typedef void (*OperationFn)(Dataset*);
+
 
 typedef struct {
   const char* label;
   OperationFn fn;
 } MenuItem;
 
-// ─── Prototypes ───────────────────────────────────────────────────────────────
+
 // Dataset lifecycle
 void   ds_init(Dataset* ds);
 int    ds_append(Dataset* ds, double val);
@@ -43,7 +32,7 @@ void   ds_reset(Dataset* ds);
 void   ds_free(Dataset* ds);
 void   ds_print(Dataset* ds);
 
-// Operations (all match OperationFn signature)
+// Operations 
 void op_computeSumAvg  (Dataset* ds);
 void op_findMinMax     (Dataset* ds);
 void op_filter         (Dataset* ds);
@@ -70,9 +59,6 @@ int    readInt   (const char* p, int lo, int hi);
 double readDouble(const char* p);
 void   clearInput(void);
 
-// ─── Dispatcher Table ─────────────────────────────────────────────────────────
-//   Each menu option maps directly to a function pointer.
-//   Adding a new operation = add one line here. No switch/if needed.
 static MenuItem menu[] = {
   { "Load dataset from file",          op_loadFile       },
   { "Display dataset",                 op_displayDataset },
@@ -87,21 +73,21 @@ static MenuItem menu[] = {
 };
 #define MENU_SIZE ((int)(sizeof(menu)/sizeof(menu[0])))
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+//Main
 int main(void) {
   Dataset ds;
   ds_init(&ds);
 
   int choice;
   do {
-    printf("\n╔══════════════════════════════════════╗\n");
-    printf("║    Data Analysis Toolkit             ║\n");
-    printf("║    Dataset size: %-6d              ║\n", ds.size);
-    printf("╠══════════════════════════════════════╣\n");
+
+    printf("    Data Analysis Toolkit             \n");
+    printf(" Dataset size: %-6d              \n", ds.size);
     for (int i = 0; i < MENU_SIZE; i++)
       printf("║  %2d) %-33s║\n", i+1, menu[i].label);
-    printf("║   0) Exit                            ║\n");
-    printf("╚══════════════════════════════════════╝\n");
+    printf("  0) Exit \n");
+
+
 
     choice = readInt("Choice", 0, MENU_SIZE);
     if (choice == 0) break;
