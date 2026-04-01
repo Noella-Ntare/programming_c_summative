@@ -1,9 +1,5 @@
 # C Programming Summative Assessment
 
-> **Course:** Programming in C  
-> **Total Points:** 30  
-> **Due:** Thursday 11:59 PM  
-
 A collection of five systems programming projects covering embedded systems, shell scripting, data structures, function pointers, and multi-threading.
 
 ---
