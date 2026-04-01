@@ -1,14 +1,8 @@
-/**
- * Project 1: Smart Traffic Light Controller
- * ==========================================
- * Tinkercad Wiring:
- *   Intersection A: Red=D2, Yellow=D3, Green=D4, Button=D7
- *   Intersection B: Red=D8, Yellow=D9, Green=D10, Button=D11
- */
+
 
 #include <Arduino.h>
 
-// ── Pin Definitions ──────────────────────────────────────────────
+//Pin Definitions
 #define A_RED    2
 #define A_YELLOW 3
 #define A_GREEN  4
@@ -18,22 +12,22 @@
 #define BTN_A    7
 #define BTN_B    11
 
-// ── Timing (milliseconds) ────────────────────────────────────────
+// Timing (milliseconds) 
 #define BASE_GREEN_TIME   5000UL   // normal green = 5 seconds
 #define EXTENDED_GREEN    8000UL   // 3+ vehicles = 8 seconds
 #define MIN_GREEN_TIME    3000UL   // no vehicles = 3 seconds
 #define YELLOW_TIME       2000UL   // always 2 seconds yellow
 #define STATUS_INTERVAL   3000UL   // print status every 3 seconds
 
-// ── Signal State ─────────────────────────────────────────────────
+//Signal State 
 typedef enum {
   SIG_RED,
   SIG_YELLOW,
   SIG_GREEN
 } SignalState;
 
-// ── Intersection Structure ────────────────────────────────────────
-// One struct holds ALL data for one traffic light set
+// Intersection Structure 
+
 typedef struct {
   const char*   name;           // "A" or "B"
   uint8_t       pinRed;
@@ -48,13 +42,13 @@ typedef struct {
   bool          manualOverride; // set true via serial command
 } Intersection;
 
-// ── Globals ───────────────────────────────────────────────────────
+//Globals 
 Intersection  intersections[2];
 uint8_t       activeIntersection = 0;
 unsigned long lastStatusPrint    = 0;
 bool          systemRunning      = true;
 
-// ── Function Prototypes ───────────────────────────────────────────
+//Function Prototypes
 void          initIntersection(Intersection* inter, const char* name,
                                uint8_t r, uint8_t y, uint8_t g, uint8_t btn);
 void          setSignal(Intersection* inter, SignalState newState);
@@ -65,7 +59,6 @@ void          handleSerial();
 void          logEvent(const char* event, const char* intersection);
 unsigned long calcGreenTime(Intersection* inter);
 
-// ═════════════════════════════════════════════════════════════════
 void setup() {
   Serial.begin(9600);
   while (!Serial) {}
@@ -82,7 +75,7 @@ void setup() {
   logEvent("SYSTEM_START", "ALL");
 }
 
-// ── Main Loop (non-blocking — no delay() used anywhere) ──────────
+
 void loop() {
   if (!systemRunning) return;
 
@@ -97,8 +90,8 @@ void loop() {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════
-// Initialise one intersection — sets pins, clears data
+
+// Initialise one intersection 
 void initIntersection(Intersection* inter, const char* name,
                       uint8_t r, uint8_t y, uint8_t g, uint8_t btn) {
   inter->name           = name;
@@ -116,7 +109,7 @@ void initIntersection(Intersection* inter, const char* name,
   pinMode(r,   OUTPUT);
   pinMode(y,   OUTPUT);
   pinMode(g,   OUTPUT);
-  pinMode(btn, INPUT_PULLUP);   // LOW = pressed
+  pinMode(btn, INPUT_PULLUP);   
 
   // All LEDs off at start
   digitalWrite(r, LOW);
@@ -124,8 +117,7 @@ void initIntersection(Intersection* inter, const char* name,
   digitalWrite(g, LOW);
 }
 
-// ── Turn all LEDs off first, then turn the right one on ──────────
-// This prevents any invalid state (e.g. two LEDs on at once)
+
 void setSignal(Intersection* inter, SignalState newState) {
   digitalWrite(inter->pinRed,    LOW);
   digitalWrite(inter->pinYellow, LOW);
@@ -148,14 +140,14 @@ void setSignal(Intersection* inter, SignalState newState) {
   logEvent(buf, inter->name);
 }
 
-// ── Dynamic green time based on traffic volume ────────────────────
+//Dynamic green time based on traffic volume
 unsigned long calcGreenTime(Intersection* inter) {
   if (inter->vehicleCount >= 3) return EXTENDED_GREEN;
   if (inter->vehicleCount == 0) return MIN_GREEN_TIME;
   return BASE_GREEN_TIME;
 }
 
-// ── Update one intersection each loop tick (uses millis, not delay)
+
 void updateIntersection(Intersection* inter, uint8_t idx) {
   unsigned long elapsed = millis() - inter->stateStart;
 
@@ -174,7 +166,6 @@ void updateIntersection(Intersection* inter, uint8_t idx) {
       setSignal(&intersections[activeIntersection], SIG_GREEN);
     }
   }
-  // SIG_RED: just wait, nothing to do
 }
 
 // ── Read push buttons — each press = one vehicle detected ─────────
