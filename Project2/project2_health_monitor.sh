@@ -1,19 +1,8 @@
 #!/bin/bash
-# =============================================================================
-# Project 2: Linux Server Health Monitoring and Alert Automation Script
-# =============================================================================
-# Features:
-#   - Monitors CPU, memory, disk usage, and active processes
-#   - Configurable alert thresholds
-#   - Timestamped logging with view/clear options
-#   - Continuous monitoring loop (every N seconds)
-#   - Interactive menu-driven interface
-#   - Comprehensive error handling
-# =============================================================================
 
-# ─── Configuration ────────────────────────────────────────────────────────────
+
 LOG_FILE="/var/log/server_health.log"
-MONITOR_INTERVAL=60       # seconds between automatic checks
+MONITOR_INTERVAL=60       
 MONITORING_PID_FILE="/tmp/server_health_monitor.pid"
 
 # Default thresholds (%)
@@ -21,7 +10,7 @@ CPU_THRESHOLD=80
 MEM_THRESHOLD=80
 DISK_THRESHOLD=90
 
-# ─── Colours ──────────────────────────────────────────────────────────────────
+# Colours 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
@@ -29,7 +18,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-# ─── Dependency Check ─────────────────────────────────────────────────────────
+# Dependency Check 
 check_dependencies() {
   local missing=0
   for cmd in top free df ps awk grep; do
@@ -41,7 +30,7 @@ check_dependencies() {
   [[ $missing -eq 1 ]] && { echo "Please install missing tools and retry."; exit 1; }
 }
 
-# ─── Logging ──────────────────────────────────────────────────────────────────
+# Logging 
 log() {
   local level="$1"
   local message="$2"
@@ -61,11 +50,11 @@ init_log() {
   fi
 }
 
-# ─── Metric Collection ────────────────────────────────────────────────────────
+
 
 # Returns CPU usage as integer percentage
 get_cpu_usage() {
-  # Use /proc/stat for accuracy; fall back to top
+  # Use /proc/stat for accuracy
   if [[ -r /proc/stat ]]; then
     local cpu_line1 cpu_line2
     cpu_line1=$(grep '^cpu ' /proc/stat)
@@ -107,7 +96,7 @@ get_process_count() {
   ps aux --no-headers 2>/dev/null | wc -l
 }
 
-# ─── Display Functions ────────────────────────────────────────────────────────
+#  Display Functions 
 
 # Colour-code a percentage value
 colorize() {
@@ -121,10 +110,10 @@ colorize() {
 
 display_health() {
   local cpu mem disk procs
-  echo -e "\n${BOLD}${CYAN}========================================${RESET}"
+  
   echo -e "${BOLD}${CYAN}     SERVER HEALTH DASHBOARD${RESET}"
   echo -e "${BOLD}${CYAN}  $(date '+%Y-%m-%d %H:%M:%S')${RESET}"
-  echo -e "${BOLD}${CYAN}========================================${RESET}"
+ 
 
   echo -e "\n${BOLD}Collecting metrics...${RESET}"
   cpu=$(get_cpu_usage)
@@ -153,7 +142,7 @@ display_health() {
   check_and_alert "DISK"   $disk $DISK_THRESHOLD
 }
 
-# ─── Alert Logic ──────────────────────────────────────────────────────────────
+#Alert Logic 
 check_and_alert() {
   local resource="$1"
   local value=$2
@@ -166,7 +155,7 @@ check_and_alert() {
   fi
 }
 
-# ─── Threshold Configuration ──────────────────────────────────────────────────
+# Threshold Configuration 
 configure_thresholds() {
   echo -e "\n${BOLD}Configure Alert Thresholds${RESET}"
   echo -e "Current: CPU=${CPU_THRESHOLD}%  MEM=${MEM_THRESHOLD}%  DISK=${DISK_THRESHOLD}%\n"
@@ -194,7 +183,7 @@ configure_thresholds() {
   log "CONFIG" "Thresholds set: CPU=${CPU_THRESHOLD}% MEM=${MEM_THRESHOLD}% DISK=${DISK_THRESHOLD}%"
 }
 
-# ─── Log Management ───────────────────────────────────────────────────────────
+# Log Management 
 view_logs() {
   echo -e "\n${BOLD}Activity Log: $LOG_FILE${RESET}"
   echo -e "${CYAN}$(printf '─%.0s' {1..60})${RESET}"
@@ -217,7 +206,7 @@ clear_logs() {
   fi
 }
 
-# ─── Background Monitoring ────────────────────────────────────────────────────
+#Background Monitoring 
 start_monitoring() {
   if [[ -f "$MONITORING_PID_FILE" ]]; then
     local old_pid
@@ -265,7 +254,7 @@ stop_monitoring() {
   fi
 }
 
-# ─── Interactive Menu ─────────────────────────────────────────────────────────
+# sInteractive Menu 
 show_menu() {
   echo -e "\n${BOLD}${CYAN}=== Server Health Monitor ===${RESET}"
   echo "  1) Display current system health"
